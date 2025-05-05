@@ -22,57 +22,60 @@ namespace CPRM2.Controllers
         {
             if (User.IsInRole("Admin"))
             {
-                return RedirectToAction(nameof(AdminDashboard));
+                //return RedirectToAction(nameof(AdminDashboard));
             }
-            return RedirectToAction(nameof(AgentDashboard));
+
+            return Ok("Coming soon");
+         //   return RedirectToAction(nameof(AgentDashboard));
         }
 
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AdminDashboard()
-        {
-            var viewModel = new AdminDashboardViewModel
-            {
-                TotalAgents = await _context.Users.CountAsync(u => u.Role == "Agent"),
-                PendingVerifications = await _context.Users.CountAsync(u => u.Role == "Agent" && !u.IsVerified),
-                RecentOrders = await _context.Orders
-                    .Include(o => o.User)
-                    .OrderByDescending(o => o.OrderDate)
-                    .Take(5)
-                    .ToListAsync(),
-                RecentChatLogs = await _context.ChatbotLogs
-                    .Include(c => c.User)
-                    .OrderByDescending(c => c.Timestamp)
-                    .Take(5)
-                    .ToListAsync()
-            };
+        //[Authorize(Roles = "Admin")]
+        //public async Task<IActionResult> AdminDashboard()
+        //{
+        //    var viewModel = new AdminDashboardViewModel
+        //    {
+        //        TotalAgents = await _context.Users.CountAsync(u => u.Role == "Agent"),
+        //        PendingVerifications = await _context.Users.CountAsync(u => u.Role == "Agent" && !u.IsVerified),
+        //        RecentOrders = await _context.Orders
+        //            .Include(o => o.User)
+        //            .OrderByDescending(o => o.OrderDate)
+        //            .Take(5)
+        //            .ToListAsync(),
+        //        RecentChatLogs = await _context.ChatbotLogs
+        //            .Include(c => c.User)
+        //            .OrderByDescending(c => c.Timestamp)
+        //            .Take(5)
+        //            .ToListAsync()
+        //    };
 
-            return View(viewModel);
-        }
+        //    return View(viewModel);
+        //}
 
-        [Authorize(Roles = "Agent")]
-        public async Task<IActionResult> AgentDashboard()
-        {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        //[Authorize(Roles = "Agent")]
+        //public async Task<IActionResult> AgentDashboard()
+        //{
+        //    var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
-            var viewModel = new AgentDashboardViewModel
-            {
-                RecentOrders = await _context.Orders
-                    .Where(o => o.UserId == userId)
-                    .OrderByDescending(o => o.OrderDate)
-                    .Take(5)
-                    .ToListAsync(),
-                AvailableProducts = await _context.Products
-                    .Where(p => p.IsAvailable)
-                    .Take(5)
-                    .ToListAsync(),
-                RecentResources = await _context.Resources
-                    .OrderByDescending(r => r.UploadDate)
-                    .Take(5)
-                    .ToListAsync()
-            };
+        //    var viewModel = new AgentDashboardViewModel
+        //    {
+        //        RecentOrders = await _context.Orders
+        //            .Where(o => o.UserId == userId)
+        //            .OrderByDescending(o => o.OrderDate)
+        //            .Take(5)
+        //            .ToListAsync(),
+        //        AvailableProducts = await _context.Products
+        //            .Where(p => p.IsAvailable)
+        //            .Take(5)
+        //            .ToListAsync(),
+        //        RecentResources = await _context.Resources
+        //            .OrderByDescending(r => r.UploadDate)
+        //            .Take(5)
+        //            .ToListAsync()
+        //    };
 
-            return View(viewModel);
-        }
+        //    return View(viewModel);
+        //}
+  
     }
 
     public class AdminDashboardViewModel
