@@ -8,7 +8,9 @@ var connectionString = builder.Configuration.GetConnectionString("dbcontext") ??
 builder.Services.AddDbContext<CPRM2IdentityContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddDbContext<CprmDbContext>(options => options.UseSqlServer(connectionString));
 
-builder.Services.AddDefaultIdentity<CPRM2User>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<CPRM2IdentityContext>();
+builder.Services.AddDefaultIdentity<CPRM2User>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole>() // Ensure this line is here
+    .AddEntityFrameworkStores<CPRM2IdentityContext>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
