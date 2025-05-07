@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Hosting;
 using CPRM2.Areas.Identity.Data;
 using System.Text.Json.Serialization;
 using System.Text;
+using MimeKit;
 
 namespace CPRM2.Controllers
 {
@@ -140,7 +141,55 @@ namespace CPRM2.Controllers
                     return Json(new { success = false, message = string.Join(", ", result.Errors.Select(e => e.Description)) });
                 }
 
-               await _userManager.AddToRoleAsync(cprm2user, "Agent");
+                await _userManager.AddToRoleAsync(cprm2user, "Agent");
+
+                // use mailkit/mimekit to send email without SSL certificate validation
+                var emailConfig = _configuration.GetSection("EmailConfiguration");
+                var smtpServer = emailConfig["SmtpServer"];
+                var port = int.Parse(emailConfig["Port"]);
+                var smtpUser = emailConfig["UserName"];
+                var smtpPass = emailConfig["Password"];
+                var fromAddress = emailConfig["From"];
+
+                var email = new MimeMessage();
+                email.From.Add(new MailboxAddress("CPRM2", fromAddress));
+                email.To.Add(new MailboxAddress(user.UserName, user.Email));
+                email.Subject = "Welcome to CPRM2 – Your Partner Portal Access";
+
+                email.Body = new TextPart("plain")
+                {
+                    Text = $@"
+                            Hello {user.UserName},
+
+                            Welcome to CPRM2 – your Channel Partner Relationship Management portal.
+
+                            You can now access tools to:
+                            - View and order products like SIM cards, routers, and recharge vouchers
+                            - Track commissions and transactions
+                            - Upload and verify documents
+                            - Chat with our support bot for help
+                            - Access training materials to boost your sales
+
+                            👉 To get started, log in on the website,   
+                            (Use your email and the password you set during registration.)
+
+                            Need help? Our support team is ready to assist via the chatbot or at support@yourcompany.com.
+
+                            Thank you for partnering with us.
+
+                            Best regards,  
+                            The CPRM2 Team
+                            "
+                };
+
+
+                using var smtpClient = new MailKit.Net.Smtp.SmtpClient();
+                // disable SSL certificate validation
+                smtpClient.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
+                await smtpClient.ConnectAsync(smtpServer, port, true);
+                await smtpClient.AuthenticateAsync(smtpUser, smtpPass);
+                await smtpClient.SendAsync(email);
+                await smtpClient.DisconnectAsync(true);
 
                 return Json(new { success = true });
             }

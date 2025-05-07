@@ -49,7 +49,7 @@ namespace CPRM2.Controllers
                 return NotFound();
             }
 
-            
+
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var order = await _context.Orders
@@ -57,7 +57,7 @@ namespace CPRM2.Controllers
                     .ThenInclude(oi => oi.Product)
                 .FirstOrDefaultAsync(m => m.OrderId == id && m.UserId == userId);
 
-         var result = await   paynow.PollTransactionAsync(order.PaymentMethod);
+            var result = await paynow.PollTransactionAsync(order.PaymentMethod);
 
             if (result.WasPaid)
             {
@@ -66,7 +66,7 @@ namespace CPRM2.Controllers
                 _context.Update(order);
                 await _context.SaveChangesAsync();
             }
-                if (order == null)
+            if (order == null)
             {
                 return NotFound();
             }
@@ -195,21 +195,21 @@ namespace CPRM2.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var totalAmount = cart.Sum(i => i.UnitPrice * i.Quantity);
 
-           
-             
+
+
             List<OrderItem> orderItems = new List<OrderItem>();
             // Add order items
             foreach (var item in cart)
             {
                 var orderItem = new OrderItem
                 {
-                 
+
                     ProductId = item.ProductId,
                     Quantity = item.Quantity,
                     UnitPrice = item.UnitPrice
                 };
                 orderItems.Add(orderItem);
-                
+
             }
             // Create the order
             var order = new Order
@@ -229,60 +229,61 @@ namespace CPRM2.Controllers
             await _context.SaveChangesAsync();
             return await RetryPayment(order.OrderId);
             // Clear the cart
-          
 
-       
+
+
         }
         public async Task<IActionResult> RetryPayment(int id)
         {
 
             var order = await _context.Orders.AsNoTracking()
-                    .Include(d=>d.OrderItems)
+                    .Include(d => d.OrderItems)
                 .AsSplitQuery()
-                .FirstOrDefaultAsync(d=>d.OrderId == id);
-
-            
-                paynow.ResultUrl = $"https://localhost:44336/Orders/Details/{order.OrderId}";
-                paynow.ReturnUrl = $"https://localhost:44336/Orders/Details/{order.OrderId}";
-                // The return url can be set at later stages. You might want to do this if you want to pass data to the return url (like the reference of the transaction)
-
-                // Create a new payment 
-                var payment = paynow.CreatePayment("Order ID:" + "#000-" + order.OrderId);
+                .FirstOrDefaultAsync(d => d.OrderId == id);
 
 
-                // Add items to the payment
-                foreach (var item in order.OrderItems)
-                {
-                    payment.Add(item.ProductId.ToString(), (decimal)item.UnitPrice.Value);
-                }
-                // Send payment to paynow
-                var response = paynow.Send(payment);
+            paynow.ResultUrl = $"https://localhost:44336/Orders/Details/{order.OrderId}";
+            paynow.ReturnUrl = $"https://localhost:44336/Orders/Details/{order.OrderId}";
+            // The return url can be set at later stages. You might want to do this if you want to pass data to the return url (like the reference of the transaction)
+
+            // Create a new payment 
+            var payment = paynow.CreatePayment("Order ID:" + "#000-" + order.OrderId);
 
 
-                // Check if payment was sent without error
-                if (response.Success())
-                {
-                    // Get the url to redirect the user to so they can make payment
-                    var link = response.RedirectLink();
+            // Add items to the payment
+            foreach (var item in order.OrderItems)
+            {
+                payment.Add(item.ProductId.ToString(), (decimal)item.UnitPrice.Value);
+            }
+            // Send payment to paynow
+            var response = paynow.Send(payment);
 
 
-                    // Get the poll url of the transaction
+            // Check if payment was sent without error
+            if (response.Success())
+            {
+                // Get the url to redirect the user to so they can make payment
+                var link = response.RedirectLink();
 
-                    var pollUrl = response.PollUrl();
-                    order.PaymentMethod = pollUrl;
-                    _context.Update(order);
-                    await _context.SaveChangesAsync();
+
+                // Get the poll url of the transaction
+
+                var pollUrl = response.PollUrl();
+                order.PaymentMethod = pollUrl;
+
+                await _context.Database.ExecuteSqlAsync($"UPDATE Orders SET Payment_Method = '{pollUrl}' WHERE Order_Id = {order.OrderId}");
+
                 ClearCart();
                 return Redirect(link);
-             
+
             }
             else
             {
                 return Ok(response);
             }
-                // TODO: Implement PayNow integration
-                return RedirectToAction(nameof(PaymentSuccess), new { orderId = order.OrderId });
-             
+            // TODO: Implement PayNow integration
+            return RedirectToAction(nameof(PaymentSuccess), new { orderId = order.OrderId });
+
         }
 
         // GET: Orders/PaymentSuccess
