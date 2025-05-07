@@ -81,7 +81,7 @@ namespace CPRM2.Controllers
                 string sql = "";
                 foreach (var item in order.OrderItems)
                 {
-                    sql += $"UPDATE Products SET Quantity = Quantity - {item.Quantity} WHERE ProductId = {item.ProductId};";
+                    sql += $"UPDATE Products SET Quantity = Quantity - {item.Quantity} WHERE Product_Id = {item.ProductId};";
                 }
                 await _context.Database.ExecuteSqlRawAsync(sql);
                 _context.Update(order);
