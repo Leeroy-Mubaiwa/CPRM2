@@ -24,6 +24,9 @@ public partial class Product
     [Column("price")]
     public double? Price { get; set; }
 
+    [Column("quantity")]
+    public int? Quantity { get; set; }
+
     [Column("image_url")]
     [StringLength(255)]
     [Unicode(false)]

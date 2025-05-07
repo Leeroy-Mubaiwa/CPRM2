@@ -21,6 +21,7 @@
                         <h5 class="card-title">@item.ProductName</h5>
                         <p class="card-text text-muted">@item.Description</p>
                         <p class="card-text fw-bold">$@item.Price?.ToString("0.00")</p>
+                        <p class="card-text fw-bold"> @item.Quantity left</p>
 
                         <div class="d-flex align-items-center mb-3">
                             <div class="input-group" style="width: 130px;">
@@ -77,12 +78,12 @@
             const container = document.getElementById('toastContainer') || createToastContainer();
             const toastId = `toast-${Date.now()}`;
             const toastHtml = `
-                <div id="${toastId}" class="toast align-items-center text-white bg-${type} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
-                  <div class="d-flex">
-                    <div class="toast-body">${message}</div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                  </div>
-                </div>`;
+                    <div id="${toastId}" class="toast align-items-center text-white bg-${type} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+                      <div class="d-flex">
+                        <div class="toast-body">${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                      </div>
+                    </div>`;
             container.insertAdjacentHTML('beforeend', toastHtml);
 
             const toastEl = document.getElementById(toastId);

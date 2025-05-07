@@ -28,6 +28,20 @@ namespace CPRM2.Controllers
         }
 
         // GET: Orders
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Client()
+        {
+
+            var orders = await _context.Orders
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+
+            return View(orders);
+        }
+        // GET: Orders
         public async Task<IActionResult> Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -63,6 +77,13 @@ namespace CPRM2.Controllers
             {
                 order.PaymentStatus = "Paid";
                 order.OrderStatus = "Processing";
+                //deduct the products from the inventory
+                string sql = "";
+                foreach (var item in order.OrderItems)
+                {
+                    sql += $"UPDATE Products SET Quantity = Quantity - {item.Quantity} WHERE ProductId = {item.ProductId};";
+                }
+                await _context.Database.ExecuteSqlRawAsync(sql);
                 _context.Update(order);
                 await _context.SaveChangesAsync();
             }
@@ -276,7 +297,7 @@ namespace CPRM2.Controllers
                 var pollUrl = response.PollUrl();
                 order.PaymentMethod = pollUrl;
 
-                Console.WriteLine("----------------------------"+pollUrl);
+                Console.WriteLine("----------------------------" + pollUrl);
                 await _context.Database.ExecuteSqlRawAsync($"UPDATE Orders SET Payment_Method = '{pollUrl}' WHERE Order_Id = {order.OrderId}");
 
                 ClearCart();
@@ -332,6 +353,36 @@ namespace CPRM2.Controllers
             HttpContext.Session.SetObject(CartSessionKey, cart);
         }
 
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteAllOrdersWithNoItems()
+        {
+            var orders = await _context.Orders.Include(o => o.OrderItems)
+            .AsNoTracking()
+            .Where(o => o.OrderItems.Count == 0).ToListAsync();
+            _context.Orders.RemoveRange(orders);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Client));
+        }
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteAllOrders()
+        {
+            var orders = await _context.Orders.Include(o => o.OrderItems)
+            .AsNoTracking()
+           .ToListAsync();
+            _context.Orders.RemoveRange(orders);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Client));
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Dispatch(int id)
+        {
+            var order = await _context.Orders.FindAsync(id);
+            order.OrderStatus = "Dispatched";
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Client));
+        }
         private void ClearCart()
         {
             HttpContext.Session.Remove(CartSessionKey);
