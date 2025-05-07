@@ -242,8 +242,13 @@ namespace CPRM2.Controllers
                 .FirstOrDefaultAsync(d => d.OrderId == id);
 
 
-            paynow.ResultUrl = $"https://localhost:44336/Orders/Details/{order.OrderId}";
-            paynow.ReturnUrl = $"https://localhost:44336/Orders/Details/{order.OrderId}";
+            var request = HttpContext.Request;
+            var baseUrl = $"{request.Scheme}://{request.Host}";
+
+            // Now use this for your Paynow URLs
+            paynow.ResultUrl = $"{baseUrl}/Orders/Details/{order.OrderId}";
+            paynow.ReturnUrl = $"{baseUrl}/Orders/Details/{order.OrderId}";
+
             // The return url can be set at later stages. You might want to do this if you want to pass data to the return url (like the reference of the transaction)
 
             // Create a new payment 
@@ -271,7 +276,8 @@ namespace CPRM2.Controllers
                 var pollUrl = response.PollUrl();
                 order.PaymentMethod = pollUrl;
 
-                await _context.Database.ExecuteSqlAsync($"UPDATE Orders SET Payment_Method = '{pollUrl}' WHERE Order_Id = {order.OrderId}");
+                Console.WriteLine("----------------------------"+pollUrl);
+                await _context.Database.ExecuteSqlRawAsync($"UPDATE Orders SET Payment_Method = '{pollUrl}' WHERE Order_Id = {order.OrderId}");
 
                 ClearCart();
                 return Redirect(link);
