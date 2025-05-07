@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CPRM2.Data;
 using CPRM2.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CPRM2.Controllers
 {
@@ -19,6 +20,11 @@ namespace CPRM2.Controllers
             _context = context;
         }
 
+        // GET: Products
+        public async Task<IActionResult> Admin()
+        {
+            return View(await _context.Products.ToListAsync());
+        }
         // GET: Products
         public async Task<IActionResult> Index()
         {
@@ -131,22 +137,50 @@ namespace CPRM2.Controllers
                 return NotFound();
             }
 
+
+
             return View(product);
         }
 
         // POST: Products/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var product = await _context.Products.FindAsync(id);
             if (product != null)
             {
+
+                //also delete all orders related to the products
+                var orders = await _context.OrderItems.AsNoTracking().Where(o => o.ProductId == id).ToListAsync();
+
+
+                _context.OrderItems.RemoveRange(orders);
                 _context.Products.Remove(product);
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            TempData["Message"] = "Product deleted successfully";
+
+            return RedirectToAction(nameof(Admin));
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AdminDeleteAllProducts()
+        {
+            var products = await _context.Products.AsNoTracking().ToListAsync();
+
+            var ids = products.Select(p => p.ProductId).ToList();
+
+            //also delete all orders related to the products
+            var orders = await _context.OrderItems.AsNoTracking().Where(o => ids.Contains(o.ProductId ?? 0)).ToListAsync();
+
+
+            _context.OrderItems.RemoveRange(orders);
+            _context.Products.RemoveRange(products);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Admin));
         }
 
         private bool ProductExists(int id)
