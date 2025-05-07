@@ -77,15 +77,7 @@ namespace CPRM2.Controllers
         //}
   
     }
-
-    public class AdminDashboardViewModel
-    {
-        public int TotalAgents { get; set; }
-        public int PendingVerifications { get; set; }
-        public List<Order> RecentOrders { get; set; }
-        public List<ChatbotLog> RecentChatLogs { get; set; }
-    }
-
+ 
     public class AgentDashboardViewModel
     {
         public List<Order> RecentOrders { get; set; }
