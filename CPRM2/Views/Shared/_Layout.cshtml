@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+   
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - CPRM</title>
@@ -12,9 +13,8 @@
         integrity="sha384-hGoHjV7OyUWri8NopwGqlstj4hDVsperCk9BPyX+MZb56/Mj81CK4htI0G24m4Es" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <script src="https://cdn.datatables.net/v/bs5/dt-2.3.0/datatables.min.js"
-        integrity="sha384-7zOvA9ql/NaRs8q4iOxQ0LgXDU0uArnHO2L6o2QMHIDuvnbmWsxr5axjvByjDsRF"
-        crossorigin="anonymous"></script>
+
+
 </head>
 
 <body>
@@ -74,21 +74,38 @@
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    <script>
-        // Function to update cart count
-        function updateCartCount() {
-            $.get('@Url.Action("GetCartCount", "Orders")', function (count) {
-                $('#cartCount').text(count);
-            });
-        }
 
-        // Update cart count on page load
-        $(document).ready(function () {
-            updateCartCount();
-        });
-    </script>
+    <script src="https://cdn.datatables.net/v/bs5/dt-2.3.0/datatables.min.js"
+        integrity="sha384-7zOvA9ql/NaRs8q4iOxQ0LgXDU0uArnHO2L6o2QMHIDuvnbmWsxr5axjvByjDsRF"
+        crossorigin="anonymous"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        <script>
+            // Function to update cart count
+            function updateCartCount() {
+                $.get('@Url.Action("GetCartCount", "Orders")', function (count) {
+                    $('#cartCount').text(count);
+                });
+            }
+
+            // Update cart count on page load
+            $(document).ready(function () {
+                updateCartCount();
+            });
+        </script>
+    }
+
+
+
     @await RenderSectionAsync("Scripts", required: false)
+    
+
+    <script src="https://cdn.botpress.cloud/webchat/v2.4/inject.js"></script>
+    <script src="https://files.bpcontent.cloud/2025/05/06/20/20250506204143-RBQVUSIC.js"></script>
+
+ <!-- #region  -->
 </body>
 
 </html>
