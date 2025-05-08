@@ -35,30 +35,36 @@
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Products"
-                                    asp-action="Admin">Products</a>
+                                   asp-action="Admin">Products</a>
                             </li>
-                              <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Orders" asp-action="Client">
-                                Client Orders
-                            </a>
-                        </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Orders" asp-action="Client">
+                                    Client Orders
+                                </a>
+                            </li>
                         }
                         else
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Products"
-                                    asp-action="Index">Products</a>
+                                   asp-action="Index">Products</a>
                             </li>
-                              <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Orders" asp-action="Index">
-                                My Orders
-                            </a>
-                        </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Orders" asp-action="Index">
+                                    My Orders
+                                </a>
+                            </li>
                         }
-                      
+
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home"
-                                asp-action="Privacy">Privacy</a>
+                               asp-action="Privacy">Privacy</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Policies">Policies</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Trainings">Training</a>
                         </li>
                     </ul>
                     <ul class="navbar-nav">

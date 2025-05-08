@@ -64,6 +64,14 @@ namespace CPRM2.Controllers
 
         }
 
+        public IActionResult Policies()
+        {
+            return View();
+        }
+        public IActionResult Trainings()
+        {
+            return View();
+        }
         public IActionResult Privacy()
         {
             return View();
